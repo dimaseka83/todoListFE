@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { ref, reactive, nextTick } from 'vue'
+import { ref, reactive } from 'vue'
 import AuthLayout from '@/layouts/AuthLayout.vue'
 import { useDisplay } from 'vuetify'
-import { useLoading } from '@/stores/loading'
-import { useError } from '@/stores/myError'
+import { useLoading } from '@/stores/Loading'
+import { useError } from '@/stores/Error'
 import { useAxios } from '@/composables/useAxios'
+import { getInformationUser } from '@/services/auth'
 
 const { mobile } = useDisplay()
 const loadingStore = useLoading()
-const errorStore = useError()
+const { setError, clearError } = useError()
 const { axiosPost } = useAxios()
 
 interface Form {
   email: string
   password: string
-
 }
 
 const form: Form = reactive({
@@ -28,30 +28,14 @@ const rules = {
   required: (value: string) => !!value || 'Required.'
 }
 
-const getInformationUser = async () => {
-  try {
-    const getToken = localStorage.getItem('token')
-
-    if (!getToken) {
-      return
-    }
-
-    const response = await axiosPost('/auth/me')
-    console.log(response)
-
-  } catch (error) {
-    console.log(error)
-  }
-}
-
 const submitLogin = async () => {
+  loadingStore.setLoading(true)
+    const { success, data, message } = await axiosPost('/auth/login', form)
   try {
-    loadingStore.setLoading(true)
-    const {success, data, message} = await axiosPost('/auth/login', form)
     if (!success) {
-      errorStore.setError(message)
+      setError(message)
     } else {
-      errorStore.clearError()
+      clearError()
       // Do something after login
       localStorage.setItem('token', data.token)
       await getInformationUser()

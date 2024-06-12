@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useDisplay } from 'vuetify'
-import { useError } from '@/stores/myError'
+import { useError } from '@/stores/Error'
 
 const { mobile } = useDisplay()
 

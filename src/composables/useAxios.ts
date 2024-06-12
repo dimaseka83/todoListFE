@@ -6,7 +6,7 @@ export const useAxios = () => {
   const axiosDelete = inject<(url: string) => Promise<any>>('delete')
 
   if (!axiosGet || !axiosPost || !axiosDelete) {
-    throw new Error('Axios functions are not provided')
+    throw new Error('useAxios composable is not provided')
   }
 
   return {
