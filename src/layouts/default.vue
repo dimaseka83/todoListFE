@@ -1,16 +1,14 @@
 <template>
-    <div>
-        <header>ini default</header>
-        <slot></slot>
-    </div>
+  <div>
+    <header>ini default</header>
+    <slot></slot>
+  </div>
 </template>
 
 <script>
 export default {
-    name: "AppLayout",
+  name: 'AppLayout'
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
