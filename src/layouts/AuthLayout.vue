@@ -28,7 +28,6 @@ watch(showSnackbar, (val) => {
 </script>
 
 <template>
-  <v-container class="fill-height">
     <v-row no-gutters align="center" justify="center">
       <v-col>
         <v-card
@@ -44,7 +43,6 @@ watch(showSnackbar, (val) => {
         </v-snackbar>
       </v-col>
     </v-row>
-  </v-container>
 </template>
 
 <style lang="scss">
