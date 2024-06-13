@@ -107,6 +107,9 @@ const submitRegister = async () => {
                 Daftar
               </v-btn>
             </div>
+                        <div class="text-center mt-4">
+              <p>Sudah punya akun? <router-link to="/">Silahkan login</router-link></p>
+            </div>
           </v-form>
         </v-sheet>
       </v-container>
