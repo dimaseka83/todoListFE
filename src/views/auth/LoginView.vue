@@ -4,13 +4,13 @@ import AuthLayout from '@/layouts/AuthLayout.vue'
 import { useDisplay } from 'vuetify'
 import { useLoading } from '@/stores/Loading'
 import { useError } from '@/stores/Error'
-import { useAxios } from '@/composables/useAxios'
+import { createAxiosInstance } from '@/services/factory'
 import { getInformationUser } from '@/services/auth'
 
 const { mobile } = useDisplay()
 const loadingStore = useLoading()
 const { setError, clearError } = useError()
-const { axiosPost } = useAxios()
+const { axiosPost } = createAxiosInstance()
 
 interface Form {
   email: string
@@ -30,7 +30,7 @@ const rules = {
 
 const submitLogin = async () => {
   loadingStore.setLoading(true)
-    const { success, data, message } = await axiosPost('/auth/login', form)
+  const { success, data, message } = await axiosPost('/auth/login', form)
   try {
     if (!success) {
       setError(message)

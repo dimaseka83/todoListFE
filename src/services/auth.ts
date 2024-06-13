@@ -1,30 +1,24 @@
 import { nextTick } from 'vue'
-import { createAxiosInstance } from './factory'
 import { useError } from '../stores/Error'
 import { useUser } from '../stores/User'
-import { useRouter } from 'vue-router'
+import router from '@/router'
+import axios from 'axios'
 
 export const getInformationUser = async () => {
-  const { setError } = useError()
-  const { axiosPost } = createAxiosInstance()
   const { setUser } = useUser()
-  const router = useRouter()
+  const { setError } = useError() // Provide the second argument to useError function
+  axios.defaults.baseURL = import.meta.env.VITE_API_URL as string
+  axios.defaults.headers.common['Authorization'] = `Bearer ${localStorage.getItem('token')}` ?? ''
 
   try {
-    const { success, data, message } = await axiosPost('/auth/me')
-
-    if (!success) {
-      setError(message)
-      await nextTick(() => {
-        router.push('/')
-      })
-    }
-
+    const { data } = await axios.get('/auth/me')
     setUser(data)
-    await nextTick(() => {
-      router.push('/tasks')
+    nextTick(() => {
+      router.push({ name: 'tasks' }) // Update the name to the correct route name
     })
   } catch (error) {
+    router.push({ name: 'login' }) // Update the name to the correct route name
+    console.log(error)
     setError(error.message as string)
   }
 }

@@ -1,40 +1,39 @@
-import { defineStore } from "pinia";
+import { defineStore } from 'pinia'
 
-interface State
-{
-    user: {
-        name: string;
-        email: string;
-        password: string;
-    }
+interface State {
+  user: {
+    name: string
+    email: string
+    password: string
+  }
 }
 
-export const useUser = defineStore("user", {
-    state: (): State => ({
-        user: {
-            name: "",
-            email: "",
-            password: "",
-        },
-    }),
-    getters: {
-        getUser(): State["user"]
-        {
-            return this.user;
-        },
+export const useUser = defineStore('user', {
+  state: (): State => ({
+    user: {
+      name: '',
+      email: '',
+      password: ''
+    }
+  }),
+  getters: {
+    getUser(): State['user'] {
+      return this.user
     },
-    actions: {
-        setUser(payload: State["user"]): void
-        {
-            this.user = payload;
-        },
-        clearUser(): void
-        {
-            this.user = {
-                name: "",
-                email: "",
-                password: "",
-            };
-        },
+    isAuthenticated(): boolean {
+      return !!this.user.name
+    }
+  },
+  actions: {
+    setUser(payload: State['user']): void {
+      this.user = payload
     },
-});
+    clearUser(): void {
+      this.user = {
+        name: '',
+        email: '',
+        password: ''
+      }
+    }
+  }
+})
