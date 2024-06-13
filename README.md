@@ -1,3 +1,7 @@
+Berikut adalah versi yang diperbarui dari README.md Anda dengan tambahan URL aplikasi yang sudah dipublikasikan:
+
+---
+
 # vue-project
 
 This template should help get you started developing with Vue 3 in Vite.
@@ -59,3 +63,7 @@ npm run test:e2e
 ```sh
 npm run lint
 ```
+
+## Live Demo
+
+The application is live at: [https://todolistsimple.vercel.app/](https://todolistsimple.vercel.app/)
