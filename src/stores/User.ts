@@ -1,11 +1,13 @@
 import { defineStore } from 'pinia'
 
+interface User {
+  name: string
+  email: string
+  password: string
+}
+
 interface State {
-  user: {
-    name: string
-    email: string
-    password: string
-  }
+  user: User
 }
 
 export const useUser = defineStore('user', {
@@ -17,18 +19,15 @@ export const useUser = defineStore('user', {
     }
   }),
   getters: {
-    getUser(): State['user'] {
-      return this.user
-    },
     isAuthenticated(): boolean {
       return !!this.user.name
     }
   },
   actions: {
-    setUser(payload: State['user']): void {
+    setUser(payload: User): void {
       this.user = payload
     },
-    clearUser(): void {
+    logout(): void {
       this.user = {
         name: '',
         email: '',

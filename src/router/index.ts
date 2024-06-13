@@ -12,7 +12,7 @@ const router = createRouter({
     {
       path: '/tasks',
       name: 'tasks',
-      component: () => import('@/views/tasks/Tasks.vue'), // Update the path to the correct file name
+      component: () => import('@/views/tasks/TasksView.vue'), // Update the path to the correct file name
       meta: {
         requiresAuth: true
       }
