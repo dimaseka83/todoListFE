@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
-import { reactive, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { createAxiosInstance } from '@/services/factory'
 import dialogCreateEdit from './dialogCreateEdit.vue'
-
-const { axiosGet } = createAxiosInstance()
+import { useLoading } from '@/stores/Loading'
+import { useDate } from 'vuetify'
+const { axiosGet, axiosPost } = createAxiosInstance()
+const setLoading = useLoading()
 
 interface Headers {
   title: string
@@ -23,35 +25,39 @@ interface Tasks {
 const headers: Headers[] = [
   { title: 'No.', key: 'no' },
   { title: 'Tugas', key: 'title' },
-  { title: 'Tanggal Deadline', key: 'due_date' },
-  { title: 'Selesai', key: 'completed' },
-  { title: 'Prioritas', key: 'is_priority' },
-  { title: 'Tanggal Dibuat', key: 'created_at' }
+  { title: 'Deskripsi', key: 'description' },
+  { title: 'Tanggal Dibuat', key: 'dibuat' },
+  { title: 'Tanggal Jatuh Tempo', key: 'deadline' },
+  { title: 'Prioritas', key: 'prioritas' },
+  { title: 'Selesai', key: 'completed' }
 ]
 
-const tasks: Tasks[] = reactive([])
+const tasks = ref([])
+const search = ref('')
 
-const tasksSelected: Tasks | null = null
 const showDialog = ref(false)
+const dateFormat = useDate()
 
 const getData = async () => {
   try {
+    setLoading.setLoading(true)
     const { success, data, message } = await axiosGet('/tasks')
     if (!success) {
       console.log(message)
     }
 
-    tasks.length = 0
-    data.forEach((task: any, index: number) => {
-      tasks.push({
+    // change tasks to array null
+    tasks.value = data.map((task: Tasks, index: number) => {
+      return {
+        ...task,
         no: index + 1,
-        title: task.title,
-        due_date: task.due_date,
-        completed: task.completed,
-        is_priority: task.is_priority,
-        created_at: task.created_at
-      })
+        deadline: dateFormat.format(task.due_date, 'fullDateWithWeekday'),
+        dibuat: dateFormat.format(task.created_at, 'fullDateWithWeekday'),
+        prioritas: task.is_priority ? 'Ya' : 'Tidak',
+        completed: task.completed == 1 ? true : false
+      }
     })
+    setLoading.setLoading(false)
   } catch (error) {
     console.log(error)
   }
@@ -59,6 +65,51 @@ const getData = async () => {
 
 const addTask = () => {
   showDialog.value = true
+}
+
+const makeStatusWithDeadline = (due_date: string) => {
+  const date = new Date(due_date)
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  const diffTime = date.getTime() - today.getTime()
+
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+  // Mengembalikan status berdasarkan selisih hari
+  if (diffDays < 0) {
+    return {
+      status: 'error',
+      text: `Terlambat ${Math.abs(diffDays)} hari`
+    }
+  } else if (diffDays === 0) {
+    return {
+      status: 'warning',
+      text: 'Hari ini'
+    }
+  } else {
+    return {
+      status: 'success',
+      text: `Tersisa ${diffDays} hari`
+    }
+  }
+}
+
+const isSelesai = async (task: Tasks) => {
+  try {
+    setLoading.setLoading(true)
+    const { ...newTask } = task
+    newTask.completed = task.completed ? 1 : 0
+
+    const { success, message } = await axiosPost(`/tasks`, newTask)
+    if (!success) {
+      console.log(message)
+    }
+    setLoading.setLoading(false)
+  } catch (error) {
+    console.log(error)
+  }
 }
 
 onMounted(() => {
@@ -69,16 +120,48 @@ onMounted(() => {
   <DefaultLayout>
     <v-container>
       <p class="text-center font-weight-bold text-h4 justify-center mt-8">Tasks</p>
-      <dialogCreateEdit :data="tasksSelected" :dialog="showDialog" @close="showDialog = false" />
-      <v-data-table :headers="headers" :items="tasks" class="mt-5">
+      <dialogCreateEdit
+        :dialog="showDialog"
+        @refresh="getData()"
+        @close="showDialog = false"
+      />
+      <v-data-table
+        :loading="setLoading.loading"
+        :headers="headers"
+        :search="search"
+        :items="tasks"
+        :sort-by="[
+          { key: 'deadline', order: 'asc' },
+          { key: 'prioritas', order: 'desc' }
+        ]"
+        multi-sort
+        class="mt-5"
+      >
         <template #top>
           <v-toolbar flat>
             <v-toolbar-title>
               <v-btn color="primary" @click="addTask">Add Task</v-btn>
             </v-toolbar-title>
             <v-spacer></v-spacer>
-            <v-text-field label="Search" single-line hide-details></v-text-field>
+            <v-text-field label="Search" single-line hide-details v-model="search"></v-text-field>
           </v-toolbar>
+        </template>
+
+        <template #item.deadline="{ item }">
+          <div>
+            {{ item.deadline }} <br />
+            <v-chip :color="makeStatusWithDeadline(item.due_date).status" small>{{
+              makeStatusWithDeadline(item.due_date).text
+            }}</v-chip>
+          </div>
+        </template>
+
+        <template #item.completed="{ item }">
+          <div>
+            <v-checkbox
+            @change="isSelesai(item)"
+            v-model="item.completed"></v-checkbox>
+          </div>
         </template>
       </v-data-table>
     </v-container>

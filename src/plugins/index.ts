@@ -6,8 +6,10 @@ import 'vuetify/styles'
 import { createPinia } from 'pinia'
 import { createVuetify } from 'vuetify'
 
+
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
+import { VDateInput } from 'vuetify/labs/components'
 
 import axiosPlugin from './axiosPlugin'
 import type { App } from 'vue'
@@ -17,8 +19,11 @@ export default {
     app.use(createPinia())
     app.use(
       createVuetify({
-        components,
-        directives
+        components: {
+          VDateInput,
+          ...components,
+        },
+        directives,
       })
     )
     app.use(axiosPlugin)

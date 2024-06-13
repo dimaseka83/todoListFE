@@ -5,24 +5,24 @@ import { useDisplay } from 'vuetify'
 import { useLoading } from '@/stores/Loading'
 import { createAxiosInstance, createSnackbarInstance } from '@/services/factory'
 import { getInformationUser } from '@/services/auth'
-import { useRouter } from 'vue-router'
 
 const { mobile } = useDisplay()
 const loadingStore = useLoading()
 const { setError, clearError } = createSnackbarInstance()
 const { axiosPost } = createAxiosInstance()
-const router = useRouter()
 
 interface Form {
+  name: string
   email: string
   password: string
 }
 
 const form: Form = reactive({
+  name: '',
   email: '',
   password: ''
 })
-const formLogin = ref(null)
+const formRegister = ref(null)
 
 const showPassword = ref(false)
 
@@ -31,9 +31,9 @@ const rules = {
   email: (value: string) => /.+@.+\..+/.test(value) || 'E-mail must be valid'
 }
 
-const submitLogin = async () => {
+const submitRegister = async () => {
   // validate form
-  const { valid } = formLogin.value ? await formLogin.value.validate() : { valid: false }
+  const { valid } = formRegister.value ? await formRegister.value.validate() : { valid: false }
 
   if (!valid) {
     return
@@ -41,7 +41,7 @@ const submitLogin = async () => {
 
   loadingStore.setLoading(true)
   try {
-    const { success, data, message } = await axiosPost('/auth/login', form)
+    const { success, data, message } = await axiosPost('/auth/register', form)
     if (!success) {
       setError(message)
     } else {
@@ -61,16 +61,24 @@ const submitLogin = async () => {
   <div>
     <AuthLayout>
       <v-container>
-        <p class="text-center font-weight-bold text-h4 justify-center mt-8">Login</p>
+        <p class="text-center font-weight-bold text-h4 justify-center mt-8">Register</p>
 
         <v-sheet class="mx-auto" :style="mobile ? 'width: 100%' : 'width: 90%'">
-          <v-form class="mx-auto" ref="formLogin" @keyup.enter="submitLogin">
+          <v-form class="mx-auto" ref="formRegister" @keyup.enter="submitRegister">
+            <v-text-field
+              v-model="form.name"
+              label="Name"
+              outlined
+              dense
+              class="mt-8"
+              :rules="[rules.required]"
+            />
+
             <v-text-field
               v-model="form.email"
               label="Email"
               outlined
               dense
-              class="mt-8"
               :rules="[rules.required, rules.email]"
             ></v-text-field>
 
@@ -93,14 +101,11 @@ const submitLogin = async () => {
                 color="blue"
                 :loading="loadingStore.loading"
                 :disabled="loadingStore.loading"
-                @click="submitLogin"
+                @click="submitRegister"
                 block
               >
-                Masuk
+                Daftar
               </v-btn>
-            </div>
-            <div class="text-center mt-4">
-              <p>Belum punya akun? <router-link to="/register">Silahkan register</router-link></p>
             </div>
           </v-form>
         </v-sheet>

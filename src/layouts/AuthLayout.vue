@@ -2,20 +2,26 @@
 import { ref, computed, watch } from 'vue'
 import { useDisplay } from 'vuetify'
 import { useError } from '@/stores/Error'
+import { useSuccess } from '@/stores/Success'
 
 const { mobile } = useDisplay()
 
 const errorStore = useError()
-const showError = ref(false)
+const successStore = useSuccess()
 
-const shouldShowError = computed(() => errorStore.error !== '')
+const message = computed(() => (errorStore.error !== '' ? errorStore.error : successStore.success))
 
-watch(shouldShowError, (val) => {
+const showSnackbar = computed(() => errorStore.error !== '' || successStore.success !== '')
+
+const closeSnackbar = () => {
+  errorStore.clearError()
+  successStore.clearSuccess()
+}
+
+watch(showSnackbar, (val) => {
   if (val) {
-    showError.value = true
     setTimeout(() => {
-      errorStore.clearError()
-      showError.value = false
+      closeSnackbar()
     }, 2000)
   }
 })
@@ -33,8 +39,8 @@ watch(shouldShowError, (val) => {
         >
           <slot />
         </v-card>
-        <v-snackbar v-model="showError" v-if="shouldShowError" :timeout="2000">
-          {{ errorStore.error }}
+        <v-snackbar v-model="showSnackbar" :timeout="2000" @click="closeSnackbar">
+          {{ message }}
         </v-snackbar>
       </v-col>
     </v-row>
