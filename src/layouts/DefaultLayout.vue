@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { useUser } from '@/stores/User'
 import { useRouter } from 'vue-router'
-import { useSuccess } from '@/stores/Success';
-import { useError } from '@/stores/Error';
-import { computed, watch } from 'vue';
+import { useSuccess } from '@/stores/Success'
+import { useError } from '@/stores/Error'
+import { computed, watch } from 'vue'
 
 const { user, logout } = useUser()
 const router = useRouter()
@@ -11,7 +11,7 @@ const router = useRouter()
 const errorStore = useError()
 const successStore = useSuccess()
 
-const message = computed(() => errorStore.error !== '' ? errorStore.error : successStore.success)
+const message = computed(() => (errorStore.error !== '' ? errorStore.error : successStore.success))
 
 const showSnackbar = computed(() => errorStore.error !== '' || successStore.success !== '')
 

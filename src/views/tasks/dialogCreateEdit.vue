@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, defineProps, defineEmits, computed, toRefs } from 'vue'
+import { ref, reactive, defineProps, defineEmits, toRefs } from 'vue'
 import { createAxiosInstance, createSnackbarInstance } from '@/services/factory'
 import { useLoading } from '@/stores/Loading'
 
@@ -8,7 +8,7 @@ const { setError, setSuccess } = createSnackbarInstance()
 const loadingValue = useLoading()
 
 const props = defineProps({
-  dialog: Boolean,
+  dialog: Boolean
 })
 
 const { dialog } = toRefs(props)
@@ -19,22 +19,26 @@ interface Form {
   title: string
   description: string
   due_date: Date | null
-  is_priority: boolean
+  is_priority: boolean,
+  [key: string]: any
+}
+
+interface formRefValue {
+  validate: () => Promise<{ valid: boolean }>
 }
 
 const form: Form = reactive({
-  title: null,
-  description: null,
+  title: '',
+  description: '',
   due_date: null,
-  is_priority: false
+  is_priority: false,
 })
 
-const formRef = ref(null)
+const formRef = ref<formRefValue | null>(null)
 
 const rules = {
   required: (value: string) => !!value || 'Required.'
 }
-
 
 const saveForm = async () => {
   const { valid } = formRef.value ? await formRef.value.validate() : { valid: false }
@@ -45,10 +49,12 @@ const saveForm = async () => {
   loadingValue.setLoading(true)
   try {
     // change date format
-    const { ...newForm } = form
-    newForm.due_date = newForm.due_date?.toISOString().substr(0, 10)
+    const newForm = {
+      ...form,
+      due_date: form.due_date?.toISOString().substr(0, 10)
+    }
 
-    const { data, success, message } = await axiosPost('/tasks', newForm)
+    const { success, message } = await axiosPost('/tasks', newForm)
     if (!success) {
       setError(message)
       return

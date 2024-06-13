@@ -16,7 +16,8 @@ export const getInformationUser = async () => {
     nextTick(() => {
       router.push({ name: 'tasks' }) // Update the name to the correct route name
     })
-  } catch (error) {
+  } catch (error: any) {
+    // Explicitly type 'error' as 'any'
     router.push({ name: 'login' }) // Update the name to the correct route name
     console.log(error)
     setError(error.message as string)

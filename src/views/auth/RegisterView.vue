@@ -17,12 +17,16 @@ interface Form {
   password: string
 }
 
+interface formRegisterValue {
+  validate: () => Promise<{ valid: boolean }>
+}
+
 const form: Form = reactive({
   name: '',
   email: '',
   password: ''
 })
-const formRegister = ref(null)
+const formRegister = ref<formRegisterValue | null>(null)
 
 const showPassword = ref(false)
 
@@ -107,7 +111,7 @@ const submitRegister = async () => {
                 Daftar
               </v-btn>
             </div>
-                        <div class="text-center mt-4">
+            <div class="text-center mt-4">
               <p>Sudah punya akun? <router-link to="/">Silahkan login</router-link></p>
             </div>
           </v-form>

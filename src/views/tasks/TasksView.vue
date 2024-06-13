@@ -17,7 +17,7 @@ interface Tasks {
   no: number
   title: string
   due_date: string
-  completed: boolean
+  completed: any
   is_priority: boolean
   created_at: string
 }
@@ -54,7 +54,7 @@ const getData = async () => {
         deadline: dateFormat.format(task.due_date, 'fullDateWithWeekday'),
         dibuat: dateFormat.format(task.created_at, 'fullDateWithWeekday'),
         prioritas: task.is_priority ? 'Ya' : 'Tidak',
-        completed: task.completed == 1 ? true : false
+        completed: task.completed === 1 ? true : false
       }
     })
     setLoading.setLoading(false)
@@ -99,8 +99,11 @@ const makeStatusWithDeadline = (due_date: string) => {
 const isSelesai = async (task: Tasks) => {
   try {
     setLoading.setLoading(true)
-    const { ...newTask } = task
-    newTask.completed = task.completed ? 1 : 0
+
+    const newTask = {
+      ...task,
+      completed: task.completed ? 1 : 0
+    }
 
     const { success, message } = await axiosPost(`/tasks`, newTask)
     if (!success) {
@@ -120,11 +123,7 @@ onMounted(() => {
   <DefaultLayout>
     <v-container>
       <p class="text-center font-weight-bold text-h4 justify-center mt-8">Tasks</p>
-      <dialogCreateEdit
-        :dialog="showDialog"
-        @refresh="getData()"
-        @close="showDialog = false"
-      />
+      <dialogCreateEdit :dialog="showDialog" @refresh="getData()" @close="showDialog = false" />
       <v-data-table
         :loading="setLoading.loading"
         :headers="headers"
@@ -149,18 +148,16 @@ onMounted(() => {
 
         <template #item.deadline="{ item }">
           <div>
-            {{ item.deadline }} <br />
-            <v-chip :color="makeStatusWithDeadline(item.due_date).status" small>{{
-              makeStatusWithDeadline(item.due_date).text
+            {{ (item as any).deadline }} <br />
+            <v-chip :color="makeStatusWithDeadline((item as any).due_date).status" small>{{
+                makeStatusWithDeadline((item as any).due_date).text
             }}</v-chip>
           </div>
         </template>
 
         <template #item.completed="{ item }">
           <div>
-            <v-checkbox
-            @change="isSelesai(item)"
-            v-model="item.completed"></v-checkbox>
+            <v-checkbox @change="isSelesai(item)"></v-checkbox>
           </div>
         </template>
       </v-data-table>

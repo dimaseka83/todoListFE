@@ -5,24 +5,26 @@ import { useDisplay } from 'vuetify'
 import { useLoading } from '@/stores/Loading'
 import { createAxiosInstance, createSnackbarInstance } from '@/services/factory'
 import { getInformationUser } from '@/services/auth'
-import { useRouter } from 'vue-router'
 
 const { mobile } = useDisplay()
 const loadingStore = useLoading()
 const { setError, clearError } = createSnackbarInstance()
 const { axiosPost } = createAxiosInstance()
-const router = useRouter()
 
 interface Form {
   email: string
   password: string
 }
 
+interface FormLoginValue {
+  validate: () => Promise<{ valid: boolean }>
+}
+
 const form: Form = reactive({
   email: '',
   password: ''
 })
-const formLogin = ref(null)
+const formLogin = ref<FormLoginValue | null>(null)
 
 const showPassword = ref(false)
 
