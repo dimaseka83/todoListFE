@@ -9,18 +9,23 @@ export const authGuard = async (
   const userStore = useUser()
   const token = localStorage.getItem('token')
 
-  if (to.meta.requiresAuth) {
-    if (token) {
-      try {
-        await userStore.fetchUser() // Pastikan fungsi ini mengupdate isAuthenticated
+  if (token) {
+    try {
+      await userStore.fetchUser()
+      if (to.name === 'login' || to.name === 'register') {
+        next({ name: 'tasks' })
+      } else {
         next()
-      } catch (error) {
-        next({ name: 'login' })
       }
-    } else {
+    } catch (error) {
+      userStore.logout()
       next({ name: 'login' })
     }
   } else {
-    next()
+    if (to.meta.requiresAuth) {
+      next({ name: 'login' })
+    } else {
+      next()
+    }
   }
 }
