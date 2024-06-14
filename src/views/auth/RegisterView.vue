@@ -5,11 +5,14 @@ import { useDisplay } from 'vuetify'
 import { useLoading } from '@/stores/Loading'
 import { createAxiosInstance, createSnackbarInstance } from '@/services/factory'
 import { getInformationUser } from '@/services/auth'
+import { useRouter } from 'vue-router'
 
 const { mobile } = useDisplay()
 const loadingStore = useLoading()
 const { setError, clearError } = createSnackbarInstance()
 const { axiosPost } = createAxiosInstance()
+const router = useRouter()
+
 
 interface Form {
   name: string
@@ -48,11 +51,13 @@ const submitRegister = async () => {
     const { success, data, message } = await axiosPost('/auth/register', form)
     if (!success) {
       setError(message)
+      return
     } else {
       clearError()
       // Do something after login
       localStorage.setItem('token', data.token)
       await getInformationUser()
+      router.push({ name: 'tasks' })
     }
   } catch (error) {
     console.log(error)

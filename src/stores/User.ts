@@ -1,38 +1,41 @@
 import { defineStore } from 'pinia'
+import axios from 'axios'
 
-interface User {
-  name: string
-  email: string
-  password: string
+interface UserState {
+  user: any
+  isAuthenticated: boolean
 }
 
-interface State {
-  user: User
+interface User {
+  id: number
+  name: string
+  email: string
 }
 
 export const useUser = defineStore('user', {
-  state: (): State => ({
-    user: {
-      name: '',
-      email: '',
-      password: ''
-    }
+  state: (): UserState => ({
+    user: null,
+    isAuthenticated: false
   }),
-  getters: {
-    isAuthenticated(): boolean {
-      return !!this.user.name
-    }
-  },
   actions: {
-    setUser(payload: User): void {
-      this.user = payload
-    },
-    logout(): void {
-      this.user = {
-        name: '',
-        email: '',
-        password: ''
+    async fetchUser() {
+      try {
+        const { data } = await axios.get('/auth/me')
+        this.user = data
+        this.isAuthenticated = true
+      } catch (error) {
+        this.isAuthenticated = false
+        throw error
       }
+    },
+    setUser(user: User) {
+      this.user = user
+      this.isAuthenticated = true
+    },
+    logout() {
+      this.user = null
+      this.isAuthenticated = false
+      localStorage.removeItem('token')
     }
   }
 })
