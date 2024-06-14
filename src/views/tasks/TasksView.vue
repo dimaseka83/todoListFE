@@ -5,8 +5,12 @@ import { createAxiosInstance } from '@/services/factory'
 import dialogCreateEdit from './dialogCreateEdit.vue'
 import { useLoading } from '@/stores/Loading'
 import { useDate } from 'vuetify'
+import { createSnackbarInstance } from '@/services/factory'
+
+
 const { axiosGet, axiosPost } = createAxiosInstance()
 const setLoading = useLoading()
+const { setError, setSuccess } = createSnackbarInstance()
 
 interface Headers {
   title: string
@@ -17,22 +21,23 @@ interface Tasks {
   no: number
   title: string
   due_date: string
-  completed: any
+  completed: boolean | number
   is_priority: boolean
   created_at: string
 }
 
 const headers: Headers[] = [
   { title: 'No.', key: 'no' },
-  { title: 'Tugas', key: 'title' },
-  { title: 'Deskripsi', key: 'description' },
-  { title: 'Tanggal Dibuat', key: 'dibuat' },
-  { title: 'Tanggal Jatuh Tempo', key: 'deadline' },
-  { title: 'Prioritas', key: 'prioritas' },
-  { title: 'Selesai', key: 'completed' }
+  { title: 'Task', key: 'title' },
+  { title: 'Description', key: 'description' },
+  { title: 'Date Created', key: 'dateMake' },
+  { title: 'Due Date', key: 'deadline' },
+  { title: 'Priority', key: 'priority' },
+  { title: 'Completed', key: 'completed' }
 ]
 
-const tasks = ref([])
+
+const tasks = ref<Tasks[]>([])
 const search = ref('')
 
 const showDialog = ref(false)
@@ -52,8 +57,8 @@ const getData = async () => {
         ...task,
         no: index + 1,
         deadline: dateFormat.format(task.due_date, 'fullDateWithWeekday'),
-        dibuat: dateFormat.format(task.created_at, 'fullDateWithWeekday'),
-        prioritas: task.is_priority ? 'Ya' : 'Tidak',
+        dateMake: dateFormat.format(task.created_at, 'fullDateWithWeekday'),
+        priority: task.is_priority ? 'Yes' : 'No',
         completed: task.completed === 1 ? true : false
       }
     })
@@ -77,28 +82,27 @@ const makeStatusWithDeadline = (due_date: string) => {
 
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
 
-  // Mengembalikan status berdasarkan selisih hari
+  // Return status based on the difference in days
   if (diffDays < 0) {
     return {
       status: 'error',
-      text: `Terlambat ${Math.abs(diffDays)} hari`
+      text: `Late by ${Math.abs(diffDays)} days`
     }
   } else if (diffDays === 0) {
     return {
       status: 'warning',
-      text: 'Hari ini'
+      text: 'Today'
     }
   } else {
     return {
       status: 'success',
-      text: `Tersisa ${diffDays} hari`
+      text: `${diffDays} days remaining`
     }
   }
 }
 
 const isSelesai = async (task: Tasks) => {
   try {
-    setLoading.setLoading(true)
 
     const newTask = {
       ...task,
@@ -107,9 +111,10 @@ const isSelesai = async (task: Tasks) => {
 
     const { success, message } = await axiosPost(`/tasks`, newTask)
     if (!success) {
-      console.log(message)
+      setError(message)
+      return
     }
-    setLoading.setLoading(false)
+    setSuccess('Task updated successfully')
   } catch (error) {
     console.log(error)
   }
@@ -131,7 +136,7 @@ onMounted(() => {
         :items="tasks"
         :sort-by="[
           { key: 'deadline', order: 'asc' },
-          { key: 'prioritas', order: 'desc' }
+          { key: 'priority', order: 'desc' }
         ]"
         multi-sort
         class="mt-5"
@@ -157,7 +162,7 @@ onMounted(() => {
 
         <template #item.completed="{ item }">
           <div>
-            <v-checkbox @change="isSelesai(item)"></v-checkbox>
+            <v-checkbox @change="isSelesai(item)" v-model="item.completed"></v-checkbox>
           </div>
         </template>
       </v-data-table>

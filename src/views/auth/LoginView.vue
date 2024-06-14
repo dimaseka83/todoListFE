@@ -102,7 +102,7 @@ const submitLogin = async () => {
               </v-btn>
             </div>
             <div class="text-center mt-4">
-              <p>Belum punya akun? <router-link to="/register">Silahkan register</router-link></p>
+              <p>Don't have an account? <router-link to="/register">Register here</router-link></p>
             </div>
           </v-form>
         </v-sheet>

@@ -86,7 +86,7 @@ const closeDialog = () => {
 <template>
   <v-dialog v-model="dialog" persistent max-width="500">
     <v-card>
-      <v-card-title>Create Tasks</v-card-title>
+      <v-card-title>Create Task</v-card-title>
       <v-card-text>
         <v-form ref="formRef">
           <v-text-field
